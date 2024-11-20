@@ -6,11 +6,10 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Geographic Sleep Health Disparities in New York City"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - CJ Concepcion (mmc2324)
+  repo-url: https://github.com/cj-concepcion/sleep-health
   date: today
   page-footer:
     right: |
