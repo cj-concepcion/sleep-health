@@ -1,1 +1,296 @@
 # Results
+
+
+## Sleep Trends Over Time (2018-2022)
+```{r}
+# Load required libraries
+library(tidyverse)
+library(scales)
+
+# Reshape the data for easier plotting
+sleep_data <- read.csv("data_cleaning/sleep_health_final_dataset.csv") |>
+  summarise(
+    sleep18_2018 = mean(perc_sleep18),
+    sleep18_2020 = mean(perc_sleep20),
+    sleep18_2022 = mean(perc_sleep22)
+  ) |>
+  pivot_longer(
+    cols = everything(),
+    names_to = "measure",
+    values_to = "percentage"
+  ) |>
+  mutate(
+    year = case_when(
+      str_detect(measure, "2018") ~ 2018,
+      str_detect(measure, "2020") ~ 2020,
+      str_detect(measure, "2022") ~ 2022
+    ),
+    age_group = str_extract(measure, "\\d+") |> 
+      paste0("Age ", str_extract(measure, "\\d+"), "+") # paste0("Age ", _, "+") # or we could just do: paste0("Age ", str_extract(measure, "\\d+"), "+")
+  )
+
+# Create the plot
+sleep_trends_plot <- ggplot(sleep_data, aes(x = year, y = percentage, group = 1)) +
+  geom_line(linewidth = 1, color = "#2c3e50") +
+  geom_point(size = 3, color = "#2c3e50") +
+  scale_y_continuous(
+    limits = c(30, 45),
+    labels = function(x) paste0(x, "%"),
+    breaks = seq(30, 45, by = 5)
+  ) +
+  scale_x_continuous(breaks = c(2018, 2020, 2022)) +
+  labs(
+    title = "Sleep Deprivation Trends in NYC (2018-2022)",
+    subtitle = "Percentage of adults sleeping less than 7 hours per night",
+    x = "Year",
+    y = "Percentage of Population",
+    caption = "Data source: NYC Health Department"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    axis.title = element_text(face = "bold"),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(color = "gray30", hjust = 0)
+  )
+
+# Display the plot
+print(sleep_trends_plot)
+```
+## Sleep Trends Over Time Mapped
+
+```{r}
+library(sf)
+library(viridis) 
+
+sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp")
+
+# Basic choropleth of 2022 sleep deprivation rates
+ggplot() +
+  geom_sf(data = sleep_health_data_geo,
+          aes(fill = prc_s22),
+          color = "white",
+          size = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "% Adults\nSleeping <7hrs",
+    limits = c(25, 50)  # adjust based on your data range
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Deprivation Rates Across NYC Neighborhoods (2022)",
+    subtitle = "Percentage of adults reporting less than 7 hours of sleep per night",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+
+# Faceted version showing change over time
+sleep_health_data_geo_long <- sleep_health_data_geo |>
+  pivot_longer(
+    cols = c(prc_s18, prc_s20, prc_s22),
+    names_to = "year",
+    values_to = "sleep_perc"
+  ) |>
+  mutate(year = case_when(
+    year == "prc_s18" ~ "2018",
+    year == "prc_s20" ~ "2020",
+    year == "prc_s22" ~ "2022"
+  ))
+
+ggplot() +
+  geom_sf(data = sleep_health_data_geo_long,
+          aes(fill = sleep_perc),
+          color = "white",
+          size = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "% Adults\nSleeping <7hrs",
+    limits = c(25, 50)
+  ) +
+  facet_wrap(~year) +
+  theme_minimal() +
+  labs(
+    title = "Changes in Sleep Deprivation Across NYC (2018-2022)",
+    subtitle = "Percentage of adults reporting less than 7 hours of sleep per night",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+
+# Borough-level view with neighborhood labels
+sleep_health_data_geo |>
+  group_by(borough) |>
+  summarise(
+    avg_sleep = mean(prc_s22),
+    .groups = "drop"
+  ) |>
+  ggplot() +
+  geom_sf(aes(fill = avg_sleep)) +
+  geom_sf_label(aes(label = borough), 
+                size = 3,
+                alpha = 0.8) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "Average %\nSleeping <7hrs"
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Deprivation by Borough (2022)",
+    subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+```
+```{r}
+library(sf)
+library(viridis) 
+sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp")
+
+# Basic choropleth of 2022 sleep deprivation rates
+ggplot() +
+  geom_sf(data = sleep_health_data_geo,
+          aes(fill = prc_s22),
+          color = "white",
+          size = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "% Adults\nSleeping <7hrs",
+    limits = c(25, 50),
+    direction = -1  # Added this line to flip the scale
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Deprivation Rates Across NYC Zip Code Areas (2022)",
+    subtitle = "Percentage of adults reporting less than 7 hours of sleep per night",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+
+# Faceted version showing change over time
+sleep_health_data_geo_long <- sleep_health_data_geo |>
+  pivot_longer(
+    cols = c(prc_s18, prc_s20, prc_s22),
+    names_to = "year",
+    values_to = "sleep_perc"
+  ) |>
+  mutate(year = case_when(
+    year == "prc_s18" ~ "2018",
+    year == "prc_s20" ~ "2020",
+    year == "prc_s22" ~ "2022"
+  ))
+
+ggplot() +
+  geom_sf(data = sleep_health_data_geo_long,
+          aes(fill = sleep_perc),
+          color = "white",
+          size = 0.1) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "% Adults\nSleeping <7hrs",
+    limits = c(25, 50),
+    direction = -1  # Added this line to flip the scale
+  ) +
+  facet_wrap(~year) +
+  theme_minimal() +
+  labs(
+    title = "Changes in Sleep Deprivation Across NYC (2018-2022)",
+    subtitle = "Percentage of adults reporting less than 7 hours of sleep per night",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+
+# Borough-level view with neighborhood labels
+sleep_health_data_geo |>
+  group_by(borough) |>
+  summarise(
+    avg_sleep = mean(prc_s22),
+    .groups = "drop"
+  ) |>
+  ggplot() +
+  geom_sf(aes(fill = avg_sleep)) +
+  geom_sf_label(aes(label = borough), 
+                size = 3,
+                alpha = 0.8) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "Average %\nSleeping <7hrs",
+    direction = -1  # Added this line to flip the scale
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Deprivation by Borough (2022)",
+    subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+
+# Neighborhood-level view with labels
+sleep_health_data_geo |>
+ group_by(nghbrhd) |>
+ summarise(
+   avg_sleep = mean(prc_s22),
+   .groups = "drop"
+ ) |>
+ ggplot() +
+ geom_sf(aes(fill = avg_sleep)) +
+ geom_sf_label(aes(label = nghbrhd), 
+               size = 2, # Made text size smaller since there are more labels
+               alpha = 0.8,
+               label.padding = unit(0.1, "lines"), # Reduced padding around labels
+               label.r = unit(0, "lines")) + # Removed rounded corners for space efficiency
+ scale_fill_viridis(
+   option = "magma", 
+   name = "Average %\nSleeping <7hrs",
+   direction = -1
+ ) +
+ theme_minimal() +
+ labs(
+   title = "Sleep Deprivation by NYC Neighborhood (2022)",
+   subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
+   caption = "Data source: CDC"
+ ) +
+ theme(
+   plot.title = element_text(face = "bold", size = 14),
+   plot.subtitle = element_text(color = "gray30"),
+   legend.position = "right",
+   panel.grid = element_blank(),
+   axis.text = element_blank()
+ )
+```
+

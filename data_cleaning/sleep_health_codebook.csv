@@ -1,0 +1,45 @@
+﻿new_name,label
+zcta5,Geographic Area Name
+total,Estimate!!Total:!!All Races
+nh_total,Estimate!!Total:!!Not Hispanic or Latino:
+white,Estimate!!Total:!!Not Hispanic or Latino:!!White alone
+black,Estimate!!Total:!!Not Hispanic or Latino:!!Black or African American alone
+native,Estimate!!Total:!!Not Hispanic or Latino:!!American Indian and Alaska Native alone
+asian,Estimate!!Total:!!Not Hispanic or Latino:!!Asian alone
+hwpi,Estimate!!Total:!!Not Hispanic or Latino:!!Native Hawaiian and Other Pacific Islander alone
+other,Estimate!!Total:!!Not Hispanic or Latino:!!Some other race alone
+multi,Estimate!!Total:!!Not Hispanic or Latino:!!Two or more races:
+hispanic,Estimate!!Total:!!Hispanic or Latino:
+total_25yo,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over
+edu_gr9,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Less than 9th grade
+edu_gr12_nd,"Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!9th to 12th grade, no diploma"
+edu_hs,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!High school graduate (includes equivalency)
+edu_col_nd,"Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Some college, no degree"
+edu_asc,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Associate's degree
+edu_ba,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree
+edu_grad,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Graduate or professional degree
+edu_min_hs,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!High school graduate or higher
+edu_min_ba,Estimate!!EDUCATIONAL ATTAINMENT!!Population 25 years and over!!Bachelor's degree or higher
+inc_total,Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households
+inc_10k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!Less than $10,000"
+inc_15k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$10,000 to $14,999"
+inc_25k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$15,000 to $24,999"
+inc_35k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$25,000 to $34,999"
+inc_50k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$35,000 to $49,999"
+inc_75k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$50,000 to $74,999"
+inc_100k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$75,000 to $99,999"
+inc_150k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$100,000 to $149,999"
+inc_200k,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$150,000 to $199,999"
+inc_200kplus,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$200,000 or more"
+inc_mean,Estimate!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
+inc_avg,Estimate!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!Mean household income (dollars)
+ins_total_pop,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population
+ins_total,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage
+ins_private,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage!!With private health insurance
+ins_public,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage!!With public coverage
+no_ins_total,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!No health insurance coverage
+pov_families,Percent!!PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL!!All families
+pov_all,Percent!!PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL!!All people
+perc_sleep18,Percent of adults (>18) sleeping less than 7 hours in 2018
+perc_sleep20,Percent of adults (>18) sleeping less than 7 hours in 2020
+perc_sleep22,Percent of adults (>18) sleeping less than 7 hours in 2022

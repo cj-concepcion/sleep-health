@@ -18,6 +18,101 @@ Because each row of the sleep data is a model estimated value, there actually ar
 
 My plan for the final project is that once these datsets are properly merged, I will do a proper pivot longer and create a "missing" data column and do a geom_tile plot to visualize the missing data. I am thinking to do 1 missing data plot per year so as to not overcrowd the visual.
 
+### Missing Value Plot
+```{r}
+# Load required libraries
+library(tidyverse)
+library(reshape2)
 
+# Read the data
+df <- read.csv("data_cleaning/sleep_health_final_dataset.csv")
+
+# Create missing value matrix
+missing_matrix <- is.na(df) |> 
+  as.data.frame() |>
+  mutate(row_id = row_number()) |>
+  melt(id.vars = "row_id", variable.name = "column", value.name = "is_missing")
+
+# Create the heatmap
+ggplot(missing_matrix, aes(x = column, y = row_id, fill = is_missing)) +
+  geom_tile() +
+  scale_fill_manual(values = c("TRUE" = "red", "FALSE" = "salmon")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Missing Values Heatmap",
+       x = "Variables",
+       y = "Row Number",
+       fill = "Is Missing") +
+  coord_flip()
+```
+
+## Zero Value Analysis
+```{r}
+# Calculate percentage of zeros for all numeric columns
+zero_summary <- sapply(df, function(x) if(is.numeric(x)) mean(x == 0) * 100 else NA) |>
+  as.data.frame() |>
+  setNames("zero_percentage") |>
+  rownames_to_column("variable") |>
+  filter(!is.na(zero_percentage), zero_percentage > 0) |>
+  arrange(desc(zero_percentage))
+
+# Create a bar plot
+ggplot(zero_summary, aes(x = reorder(variable, zero_percentage), y = zero_percentage)) +
+  geom_bar(stat = "identity", fill = "steelblue", alpha = 0.8) +
+  geom_text(aes(label = sprintf("%.1f%%", zero_percentage)), 
+            hjust = -0.1, 
+            size = 3.5) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Percentage of Zero Values by Column",
+       x = "Variables",
+       y = "Percentage of Zeros (%)") +
+  theme(
+    plot.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 10),
+    panel.grid.major.y = element_blank()
+  ) +
+  scale_y_continuous(limits = c(0, max(zero_summary$zero_percentage) * 1.2))
+```
+
+- Write about systematic 0 values, race makes sense in areas of less diversity, income makes sense since they are gradiated steps / cumulative / may be mutually exclusive in that way
+- *POSSIBLE BONUS IF THERES TIME* - look deeper into systemic SES patterns for ZCTAs with multiple 0's
+
+```{r}
+# Create a better visualization of the zero patterns
+zero_locations <- df |>
+  select(zcta5, edu_gr9, inc_15k, inc_25k) |>
+  filter(edu_gr9 == 0 | inc_15k == 0 | inc_25k == 0)
+
+# Convert data to long format for better visualization
+zero_long <- zero_locations |>
+  pivot_longer(cols = c(edu_gr9, inc_15k, inc_25k),
+               names_to = "variable",
+               values_to = "value") |>
+  mutate(is_zero = value == 0)
+
+# Create a more readable visualization
+ggplot(zero_long, aes(x = factor(zcta5), y = variable, fill = is_zero)) +
+  geom_tile(color = "white") +
+  scale_fill_manual(values = c("steelblue", "coral")) +
+  theme_minimal() +
+  labs(title = "Zero Values Pattern Across ZCTAs",
+       x = "ZCTA",
+       y = "Variable",
+       fill = "Is Zero") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank()) +
+  scale_x_discrete(name = "ZCTA")
+
+# Create a summary table of the patterns
+zero_summary <- zero_long |>
+  group_by(zcta5) |>
+  summarise(
+    num_zeros = sum(is_zero),
+    variables_with_zeros = paste(variable[is_zero], collapse = ", ")
+  )
+
+zero_summary
+```
 
 

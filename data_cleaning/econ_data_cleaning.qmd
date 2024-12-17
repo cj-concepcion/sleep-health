@@ -1,0 +1,31 @@
+---
+title: 'Cleaning Economic Data from American Community Survey 2022'
+date: '`r Sys.Date()`'
+format: html
+---
+
+# Load Libraries
+```{r}
+library(tidyverse)
+```
+
+# Load the data
+```{r}
+econ_dataset <- read.csv("income_insurance_data_raw.csv")
+econ_codebook <- read.csv("income_insurance_codebook_final.csv")
+```
+
+# Create the cleaned dataset
+```{r}
+econ_data <- econ_dataset |> 
+  select(any_of(econ_codebook$old_name)) |> 
+  rename_with(~econ_codebook$new_name[match(., econ_codebook$old_name)]) |> 
+  slice(-1) |> # remove labels row
+  mutate(zcta5 = str_remove(zcta5, "ZCTA5 ")) # remove characters from zcta5 col
+```
+
+# Export dataset
+```{r}
+write_csv(econ_data, "econ_data.csv")
+```
+

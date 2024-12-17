@@ -1,0 +1,137 @@
+---
+title: "Final Dataset Creation/Cleaning"
+---
+
+# Load libraries
+```{r}
+library(tidyverse)
+library(sf)
+library(ggplot2)
+```
+
+# Load data
+```{r}
+race_data <- read_csv("race_data.csv")
+edu_data <- read_csv("edu_data.csv")
+econ_data <-read_csv("econ_data.csv")
+```
+
+```{r}
+# Check for duplicate ZCTAs in each dataset
+race_data |> 
+  group_by(zcta5) |> 
+  filter(n() > 1) |> 
+  nrow()
+
+edu_data |> 
+  group_by(zcta5) |> 
+  filter(n() > 1) |> 
+  nrow()
+
+econ_data |> 
+  group_by(zcta5) |> 
+  filter(n() > 1) |> 
+  nrow()
+
+# Check for any mismatched ZCTAs
+anti_join(race_data, edu_data, by = "zcta5")
+anti_join(race_data, econ_data, by = "zcta5")
+
+# Merge all three separate datasets
+demog_data_full <- race_data |> 
+  left_join(edu_data, by = "zcta5") |> 
+  left_join(econ_data, by = "zcta5") |> 
+  mutate(zcta5 = as.numeric(zcta5))
+```
+
+## Cleaning 2018, 2020 and 2022 sleep data 
+```{r}
+# load datasets
+sleep18 <- read_csv("sleep_2018.csv")
+sleep20 <- read_csv("sleep_2020.csv")
+sleep22 <- read_csv("sleep_2022.csv")
+
+# select and rename variables of interest, convert zcta5 to numeric
+sleep18 <- sleep18 |> 
+  select("LocationName","Data_Value") |> 
+  dplyr::rename(zcta5 = LocationName) |>
+  dplyr::rename(perc_sleep18 = Data_Value) |>
+  mutate(zcta5 = as.numeric(zcta5))
+ 
+sleep20 <- sleep20 |> 
+  select("LocationName","Data_Value") |> 
+  dplyr::rename(zcta5 = LocationName) |> 
+  dplyr::rename(perc_sleep20 = Data_Value) |>
+  mutate(zcta5 = as.numeric(zcta5))
+
+sleep22 <- sleep22 |> 
+  select("LocationName","Data_Value") |> 
+  dplyr::rename(zcta5 = LocationName) |> 
+  dplyr::rename(perc_sleep22 = Data_Value) |>
+  mutate(zcta5 = as.numeric(zcta5))
+
+# merge 2018, 2020, 2022 sleep datasets
+sleep_data_full <- sleep18 |> 
+  inner_join(sleep20, by = "zcta5") |> 
+  inner_join(sleep22, by = "zcta5")
+
+# read in list of NYC ZCTAs
+nyc_zctas <- read_csv("nyc_zctas.csv") |>
+  mutate(zcta5 = as.numeric(zcta5))  # Make sure zcta5 is numeric
+
+# filter sleep_data_full to only include NYC ZCTAs
+sleep_data_nyc <- sleep_data_full |>
+  semi_join(nyc_zctas, by = "zcta5")
+```
+
+# Merge demographic data with sleep data
+```{r}
+sleep_health_data <- demog_data_full |>
+  inner_join(sleep_data_nyc, by = "zcta5") 
+```
+
+# Merge with borough and neighborhood crosswalk by ZCTA
+```{r}
+# Load data
+nyc_crosswalk <- read_csv("nyc-zcta-boro-neighborhood-crosswalk.csv")
+
+nyc_crosswalk <- nyc_crosswalk |> 
+  rename(zcta5 = ZCTA) |> 
+  rename(borough = Borough) |> 
+  rename(neighborhood = Neighborhood) |> 
+  mutate(zcta5 = as.numeric(zcta5))
+
+sleep_health_data <- sleep_health_data |> 
+  left_join(nyc_crosswalk, by = "zcta5")
+```
+
+# Merge with shapefile for choropleth map plotting later on
+```{r}
+# Load shapefile
+nyc_geo <- st_read("nyc_zcta.shp") |>
+  dplyr::select("modzcta", "geometry") |> 
+  rename(zcta5 = modzcta) |> 
+  mutate(zcta5 = as.numeric(zcta5))
+
+# Confirm shapefile loaded in correctly
+ggplot() + 
+  geom_sf(data = nyc_geo)
+
+# Merge shapefile data with main dataset
+sleep_health_data_geo <- sleep_health_data |> 
+  left_join(nyc_geo, by = "zcta5")
+```
+
+
+# Export finalized datasets
+```{r}
+# Export non-spatial data
+write_csv(sleep_health_data, "../data/sleep_health_final_dataset.csv")
+
+# Export spatial data
+st_write(sleep_health_data_geo, "../data/sleep_health_geo_dataset.shp")
+```
+
+
+
+

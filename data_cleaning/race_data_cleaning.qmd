@@ -1,0 +1,31 @@
+---
+title: 'Cleaning Race/Ethnicity Data from American Community Survey 2022'
+date: '`r Sys.Date()`'
+format: html
+---
+
+# Load Libraries
+```{r}
+library(tidyverse)
+```
+
+# Load the data
+```{r}
+dataset <- read.csv("ACSDT5Y2022.B03002-Data.csv")
+codebook <- read.csv("race_variables_codebook.csv")
+```
+
+# Create the cleaned dataset
+```{r}
+race_data <- dataset |> 
+  select(any_of(codebook$old_name)) |> 
+  rename_with(~codebook$new_name[match(., codebook$old_name)]) |> 
+  slice(-1) |> # remove labels row
+  mutate(zcta5 = str_remove(zcta5, "ZCTA5 ")) # remove characters from zcta5 col
+```
+
+# Export dataset
+```{r}
+write_csv(race_data, "race_data.csv")
+```
+

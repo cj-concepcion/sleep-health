@@ -1,0 +1,31 @@
+---
+title: 'Cleaning Educational Attainment Data from American Community Survey 2022'
+date: '`r Sys.Date()`'
+format: html
+---
+
+# Load Libraries
+```{r}
+library(tidyverse)
+```
+
+# Load the data
+```{r}
+edu_dataset <- read.csv("edu_data_raw.csv")
+edu_codebook <- read.csv("edu_variables_codebook.csv")
+```
+
+# Create the cleaned dataset
+```{r}
+edu_data <- edu_dataset |> 
+  select(any_of(edu_codebook$old_name)) |> 
+  rename_with(~edu_codebook$new_name[match(., edu_codebook$old_name)]) |> 
+  slice(-1) |> # remove labels row
+  mutate(zcta5 = str_remove(zcta5, "ZCTA5 ")) # remove characters from zcta5 col
+```
+
+# Export dataset
+```{r}
+write_csv(edu_data, "edu_data.csv")
+```
+

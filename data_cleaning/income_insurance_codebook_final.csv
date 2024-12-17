@@ -1,0 +1,22 @@
+﻿new_name,old_name,label
+zcta5,NAME,Geographic Area Name
+inc_total,DP03_0051PE,Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households
+inc_10k,DP03_0052PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!Less than $10,000"
+inc_15k,DP03_0053PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$10,000 to $14,999"
+inc_25k,DP03_0054PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$15,000 to $24,999"
+inc_35k,DP03_0055PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$25,000 to $34,999"
+inc_50k,DP03_0056PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$35,000 to $49,999"
+inc_75k,DP03_0057PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$50,000 to $74,999"
+inc_100k,DP03_0058PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$75,000 to $99,999"
+inc_150k,DP03_0059PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$100,000 to $149,999"
+inc_200k,DP03_0060PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$150,000 to $199,999"
+inc_200kplus,DP03_0061PE,"Percent!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!$200,000 or more"
+inc_mean,DP03_0062E,Estimate!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!Median household income (dollars)
+inc_avg,DP03_0063E,Estimate!!INCOME AND BENEFITS (IN 2022 INFLATION-ADJUSTED DOLLARS)!!Total households!!Mean household income (dollars)
+ins_total_pop,DP03_0095PE,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population
+ins_total,DP03_0096PE,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage
+ins_private,DP03_0097PE,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage!!With private health insurance
+ins_public,DP03_0098PE,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!With health insurance coverage!!With public coverage
+no_ins_total,DP03_0099PE,Percent!!HEALTH INSURANCE COVERAGE!!Civilian noninstitutionalized population!!No health insurance coverage
+pov_families,DP03_0119PE,Percent!!PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL!!All families
+pov_all,DP03_0128PE,Percent!!PERCENTAGE OF FAMILIES AND PEOPLE WHOSE INCOME IN THE PAST 12 MONTHS IS BELOW THE POVERTY LEVEL!!All people

@@ -1,0 +1,12 @@
+﻿new_name,old_name,label
+zcta5,NAME,Geographic Area Name
+total,B03002_001E,Estimate!!Total:!!All Races
+nh_total,B03002_002E,Estimate!!Total:!!Not Hispanic or Latino:
+white,B03002_003E,Estimate!!Total:!!Not Hispanic or Latino:!!White alone
+black,B03002_004E,Estimate!!Total:!!Not Hispanic or Latino:!!Black or African American alone
+native,B03002_005E,Estimate!!Total:!!Not Hispanic or Latino:!!American Indian and Alaska Native alone
+asian,B03002_006E,Estimate!!Total:!!Not Hispanic or Latino:!!Asian alone
+hwpi,B03002_007E,Estimate!!Total:!!Not Hispanic or Latino:!!Native Hawaiian and Other Pacific Islander alone
+other,B03002_008E,Estimate!!Total:!!Not Hispanic or Latino:!!Some other race alone
+multi,B03002_009E,Estimate!!Total:!!Not Hispanic or Latino:!!Two or more races:
+hispanic,B03002_012E,Estimate!!Total:!!Hispanic or Latino:
