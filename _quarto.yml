@@ -2,11 +2,6 @@ project:
   type: book
   output-dir: docs
 
-execute:
-  echo: true
-  warning: false
-  message: false
-
 book:
   title: "Geographic Sleep Health Disparities in New York City"
   author:
@@ -28,6 +23,10 @@ format:
   html:
     theme: sandstone
     code-fold: true
-    df-print: kable 
+    df-print: kable
+    execute:
+      echo: true
+      warning: false
+      message: false
 
 
