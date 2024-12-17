@@ -4,6 +4,8 @@ project:
 
 execute:
   echo: true
+  warning: false
+  message: false
 
 book:
   title: "Geographic Sleep Health Disparities in New York City"
@@ -26,5 +28,6 @@ format:
   html:
     theme: sandstone
     code-fold: true
+    df-print: kable 
 
 

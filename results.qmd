@@ -1,11 +1,14 @@
 # Results
 
-
 ## Sleep Trends Over Time (2018-2022)
+
+### Average Overall Trend Over Time - GRAPH 1 MEDIOCRE
+
 ```{r}
 # Load required libraries
 library(tidyverse)
 library(scales)
+library(ggplot2)
 
 # Reshape the data for easier plotting
 sleep_data <- read.csv("data_cleaning/sleep_health_final_dataset.csv") |>
@@ -58,111 +61,14 @@ sleep_trends_plot <- ggplot(sleep_data, aes(x = year, y = percentage, group = 1)
 # Display the plot
 print(sleep_trends_plot)
 ```
-## Sleep Trends Over Time Mapped
+
+## Sleep Trends by Neighborhood - GRAPH 2A 
 
 ```{r}
 library(sf)
 library(viridis) 
-
-sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp")
-
-# Basic choropleth of 2022 sleep deprivation rates
-ggplot() +
-  geom_sf(data = sleep_health_data_geo,
-          aes(fill = prc_s22),
-          color = "white",
-          size = 0.1) +
-  scale_fill_viridis(
-    option = "magma",
-    name = "% Adults\nSleeping <7hrs",
-    limits = c(25, 50)  # adjust based on your data range
-  ) +
-  theme_minimal() +
-  labs(
-    title = "Sleep Deprivation Rates Across NYC Neighborhoods (2022)",
-    subtitle = "Percentage of adults reporting less than 7 hours of sleep per night",
-    caption = "Data source: CDC"
-  ) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(color = "gray30"),
-    legend.position = "right",
-    panel.grid = element_blank(),
-    axis.text = element_blank()
-  )
-
-# Faceted version showing change over time
-sleep_health_data_geo_long <- sleep_health_data_geo |>
-  pivot_longer(
-    cols = c(prc_s18, prc_s20, prc_s22),
-    names_to = "year",
-    values_to = "sleep_perc"
-  ) |>
-  mutate(year = case_when(
-    year == "prc_s18" ~ "2018",
-    year == "prc_s20" ~ "2020",
-    year == "prc_s22" ~ "2022"
-  ))
-
-ggplot() +
-  geom_sf(data = sleep_health_data_geo_long,
-          aes(fill = sleep_perc),
-          color = "white",
-          size = 0.1) +
-  scale_fill_viridis(
-    option = "magma",
-    name = "% Adults\nSleeping <7hrs",
-    limits = c(25, 50)
-  ) +
-  facet_wrap(~year) +
-  theme_minimal() +
-  labs(
-    title = "Changes in Sleep Deprivation Across NYC (2018-2022)",
-    subtitle = "Percentage of adults reporting less than 7 hours of sleep per night",
-    caption = "Data source: CDC"
-  ) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(color = "gray30"),
-    legend.position = "right",
-    panel.grid = element_blank(),
-    axis.text = element_blank()
-  )
-
-# Borough-level view with neighborhood labels
-sleep_health_data_geo |>
-  group_by(borough) |>
-  summarise(
-    avg_sleep = mean(prc_s22),
-    .groups = "drop"
-  ) |>
-  ggplot() +
-  geom_sf(aes(fill = avg_sleep)) +
-  geom_sf_label(aes(label = borough), 
-                size = 3,
-                alpha = 0.8) +
-  scale_fill_viridis(
-    option = "magma",
-    name = "Average %\nSleeping <7hrs"
-  ) +
-  theme_minimal() +
-  labs(
-    title = "Sleep Deprivation by Borough (2022)",
-    subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
-    caption = "Data source: CDC"
-  ) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(color = "gray30"),
-    legend.position = "right",
-    panel.grid = element_blank(),
-    axis.text = element_blank()
-  )
-```
-```{r}
-library(sf)
-library(viridis) 
-sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp")
+sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp", quiet =
+                                   TRUE)
 
 # Basic choropleth of 2022 sleep deprivation rates
 ggplot() +
@@ -190,6 +96,10 @@ ggplot() +
     axis.text = element_blank()
   )
 
+```
+
+### Neighborhood Sleep Trends Over Time - GRAPH 2B
+```{r}
 # Faceted version showing change over time
 sleep_health_data_geo_long <- sleep_health_data_geo |>
   pivot_longer(
@@ -228,7 +138,126 @@ ggplot() +
     panel.grid = element_blank(),
     axis.text = element_blank()
   )
+```
 
+### Zooming in further.. which neighborhoods experienced the greatest changes in sleep deprivation patterns between 2018, 2020 and 2022? *GRAPH 3 & 4*
+```{r}
+# Load and prepare the data
+df <- read.csv("data/sleep_health_final_dataset.csv")
+
+# Calculate mean sleep deprivation by neighborhood for each year
+neighborhood_sleep <- aggregate(
+    cbind(perc_sleep18, perc_sleep20, perc_sleep22) ~ neighborhood, 
+    data = df, 
+    FUN = mean
+)
+
+# Calculate changes
+neighborhood_sleep$change_18_20 <- neighborhood_sleep$perc_sleep20 - neighborhood_sleep$perc_sleep18
+neighborhood_sleep$change_20_22 <- neighborhood_sleep$perc_sleep22 - neighborhood_sleep$perc_sleep20
+
+# Get top 10 decreases for 2018-2020
+top_10_decrease <- neighborhood_sleep[order(neighborhood_sleep$change_18_20), ][1:10, ]
+top_10_decrease$neighborhood <- factor(top_10_decrease$neighborhood, 
+                                     levels = rev(top_10_decrease$neighborhood))
+
+# Get top 10 increases for 2020-2022
+top_10_increase <- neighborhood_sleep[order(-neighborhood_sleep$change_20_22), ][1:10, ]
+top_10_increase$neighborhood <- factor(top_10_increase$neighborhood, 
+                                     levels = rev(top_10_increase$neighborhood))
+
+# Define muted colors
+color_2018 <- "#7294d4"  # muted blue
+color_2020 <- "#d4827e"  # muted red
+color_2022 <- "#82b37d"  # muted green
+
+# Create first Cleveland dot plot (2018-2020 top 10 decreases)
+p1 <- ggplot(top_10_decrease, aes(y = neighborhood)) +
+    geom_segment(aes(x = perc_sleep18, xend = perc_sleep20, 
+                    yend = neighborhood), 
+                color = "#cccccc", size = 0.8) +
+    geom_point(aes(x = perc_sleep18), color = color_2018, size = 4, alpha = 0.8) +
+    geom_point(aes(x = perc_sleep20), color = color_2020, size = 4, alpha = 0.8) +
+    theme_minimal() +
+    labs(
+        title = "Top 10 Largest Decreases in Sleep Deprivation (2018 to 2020)",
+        subtitle = "Percentage of population reporting insufficient sleep",
+        x = "Percent Sleep Deprived",
+        y = NULL
+    ) +
+    theme(
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.text.x = element_text(size = 10, color = "black"),
+        plot.title = element_text(size = 12, face = "bold"),
+        plot.subtitle = element_text(size = 10, color = "grey40"),
+        plot.margin = margin(20, 20, 20, 20)
+    ) +
+    annotate("text", x = max(top_10_decrease$perc_sleep20) + 1, 
+             y = 10, 
+             label = "2020", color = color_2020, hjust = 0, size = 4) +
+    annotate("text", x = min(top_10_decrease$perc_sleep18) - 1, 
+             y = 10, 
+             label = "2018", color = color_2018, hjust = 1, size = 4)
+
+# Create second Cleveland dot plot (2020-2022 top 10 increases)
+p2 <- ggplot(top_10_increase, aes(y = neighborhood)) +
+    geom_segment(aes(x = perc_sleep20, xend = perc_sleep22, 
+                    yend = neighborhood), 
+                color = "#cccccc", size = 0.8) +
+    geom_point(aes(x = perc_sleep20), color = color_2020, size = 4, alpha = 0.8) +
+    geom_point(aes(x = perc_sleep22), color = color_2022, size = 4, alpha = 0.8) +
+    theme_minimal() +
+    labs(
+        title = "Top 10 Largest Increases in Sleep Deprivation (2020 to 2022)",
+        subtitle = "Percentage of population reporting insufficient sleep",
+        x = "Percent Sleep Deprived",
+        y = NULL
+    ) +
+    theme(
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.text.x = element_text(size = 10, color = "black"),
+        plot.title = element_text(size = 12, face = "bold"),
+        plot.subtitle = element_text(size = 10, color = "grey40"),
+        plot.margin = margin(20, 20, 20, 20)
+    ) +
+    annotate("text", x = max(top_10_increase$perc_sleep22) + 1, 
+             y = 10, 
+             label = "2022", color = color_2022, hjust = 0, size = 4) +
+    annotate("text", x = min(top_10_increase$perc_sleep20) - 1, 
+             y = 10, 
+             label = "2020", color = color_2020, hjust = 1, size = 4)
+
+# Print both plots
+print(p1)
+print(p2)
+
+# Print summary statistics for top 10 changes
+print("Top 10 largest decreases 2018-2020:")
+print(data.frame(
+    Neighborhood = top_10_decrease$neighborhood,
+    Change = round(top_10_decrease$change_18_20, 1)
+))
+
+print("\
+Top 10 largest increases 2020-2022:")
+print(data.frame(
+    Neighborhood = top_10_increase$neighborhood,
+    Change = round(top_10_increase$change_20_22, 1)
+))
+```
+
+This is quite remarkable - every single neighborhood showed a decrease in sleep deprivation from 2018 to 2020. The changes ranged from -6.6 to -3.1 percentage points, with a median decrease of 5.2 percentage points. This suggests a universal improvement in sleep patterns across all neighborhoods during this period, possibly related to the changes in work and lifestyle patterns during the early pandemic period.
+
+This makes the subsequent increases from 2020 to 2022 that we saw in the previous plots even more notable, as they represent a partial reversal of these universal improvements.
+
+### Which borough gets the best sleep? - GRAPH 5 *MEDIOCRE*
+
+```{r}
+library(ggrepel)
 # Borough-level view with neighborhood labels
 sleep_health_data_geo |>
   group_by(borough) |>
@@ -259,30 +288,44 @@ sleep_health_data_geo |>
     panel.grid = element_blank(),
     axis.text = element_blank()
   )
+```
 
-# Neighborhood-level view with labels
+### Which neighborhoods are sleeping the most? - *GRAPH 6A*
+
+```{r}
+# Neighborhood-level view labeling areas with best sleep
 sleep_health_data_geo |>
- group_by(nghbrhd) |>
- summarise(
-   avg_sleep = mean(prc_s22),
-   .groups = "drop"
+ group_by(borough) |>
+ # Get bottom 3 neighborhoods per borough (lowest sleep deprivation = best sleep)
+ mutate(
+   should_label = rank(prc_s22, ties.method = "random") <= 3  # Changed from -prc_s22 to prc_s22 to get lowest values
  ) |>
+ ungroup() |>
  ggplot() +
- geom_sf(aes(fill = avg_sleep)) +
- geom_sf_label(aes(label = nghbrhd), 
-               size = 2, # Made text size smaller since there are more labels
-               alpha = 0.8,
-               label.padding = unit(0.1, "lines"), # Reduced padding around labels
-               label.r = unit(0, "lines")) + # Removed rounded corners for space efficiency
+ geom_sf(aes(fill = prc_s22)) +
+ geom_label_repel(
+   data = . %>% filter(should_label),
+   aes(
+     label = nghbrhd,
+     geometry = geometry
+   ),
+   stat = "sf_coordinates",
+   size = 2.5,
+   alpha = 0.9,
+   box.padding = 0.5,
+   point.padding = 0.2,
+   max.overlaps = 30,
+   force = 10
+ ) +
  scale_fill_viridis(
-   option = "magma", 
+   option = "magma",
    name = "Average %\nSleeping <7hrs",
    direction = -1
  ) +
  theme_minimal() +
  labs(
    title = "Sleep Deprivation by NYC Neighborhood (2022)",
-   subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
+   subtitle = "Labels shown for three neighborhoods with lowest sleep deprivation per borough",
    caption = "Data source: CDC"
  ) +
  theme(
@@ -293,4 +336,299 @@ sleep_health_data_geo |>
    axis.text = element_blank()
  )
 ```
+
+### Which neighborhoods are sleeping the least? - *GRAPH 6B*
+
+```{r}
+# Neighborhood-level view with selective repelling labels
+sleep_health_data_geo |>
+  group_by(borough) |>
+  # Get top 3 neighborhoods per borough
+  mutate(
+    should_label = rank(-prc_s22, ties.method = "random") <= 3
+  ) |>
+  ungroup() |>
+  ggplot() +
+  geom_sf(aes(fill = prc_s22)) +
+  geom_label_repel(
+    data = . %>% filter(should_label),
+    aes(
+      label = nghbrhd,
+      geometry = geometry
+    ),
+    stat = "sf_coordinates",
+    size = 2.5,
+    alpha = 0.9,
+    box.padding = 0.5,
+    point.padding = 0.2,
+    max.overlaps = 30,
+    force = 10
+  ) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "Average %\nSleeping <7hrs",
+    direction = -1
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Deprivation by NYC Neighborhood (2022)",
+    subtitle = "Labels shown for three neighborhoods with highest sleep deprivation per borough",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+```
+
+Now that we have a sense of sleep deprivation over time and by neighborhood, let's explore its relationship with some demographic data..
+
+## How do the various racial and socioeconomic demographics relate to sleep deprivation?
+
+### Principal Component Analysis Biplot - *GRAPH 7*
+
+```{r}
+df <- read.csv("data/sleep_health_final_dataset.csv")
+
+# Create the subset with the same variables as before
+sleep_health_subset <- df |>
+  mutate(
+    perc_white = white / nh_total * 100,
+    perc_black = black / nh_total * 100,
+    perc_asian = asian / nh_total * 100,
+    perc_hispanic = hispanic / total * 100,
+    inc_mean = as.numeric(inc_mean),
+    ins_total = as.numeric(ins_total),
+    perc_ba_plus = edu_min_ba / total_25yo * 100
+  ) |>
+  select(
+    perc_white, perc_black, perc_asian, perc_hispanic,
+    perc_ba_plus, inc_mean, ins_total,
+    perc_sleep18, perc_sleep20, perc_sleep22
+  )
+
+# Remove rows with NA values
+sleep_health_subset_clean <- na.omit(sleep_health_subset)
+
+# Perform PCA
+pca_data <- sleep_health_subset_clean |> 
+  scale() |> 
+  prcomp()
+
+# Calculate variance explained
+var_explained <- pca_data$sdev^2 / sum(pca_data$sdev^2) * 100
+
+# Extract scores and add ZCTA5
+scores <- as.data.frame(pca_data$x[,1:2])
+scores$zcta5 <- df$zcta5[!is.na(rowSums(sleep_health_subset))]
+
+# Extract loadings
+loadings <- as.data.frame(pca_data$rotation[,1:2])
+loadings$variable <- c("White", "Black", "Asian", "Hispanic",
+                      "Bachelor's+", "Income", "Insurance",
+                      "Sleep Dep 2018", "Sleep Dep 2020", "Sleep Dep 2022")
+
+# Find extreme points
+scores$quadrant <- with(scores, 
+                       ifelse(PC1 > 0 & PC2 > 0, 1,
+                       ifelse(PC1 < 0 & PC2 > 0, 2,
+                       ifelse(PC1 < 0 & PC2 < 0, 3, 4))))
+
+extreme_points <- data.frame()
+for(q in 1:4) {
+    quad_points <- scores[scores$quadrant == q, ]
+    if(nrow(quad_points) > 0) {
+        distances <- sqrt(quad_points$PC1^2 + quad_points$PC2^2)
+        extreme_points <- rbind(extreme_points, 
+                              quad_points[which.max(distances), ])
+    }
+}
+
+# Create the biplot
+library(ggplot2)
+library(ggrepel)
+
+p <- ggplot() +
+    # Plot all points
+    geom_point(data = scores, 
+               aes(x = PC1, y = PC2),
+               color = 'grey70',
+               alpha = 0.5) +
+    # Highlight extreme points
+    geom_point(data = extreme_points,
+               aes(x = PC1, y = PC2),
+               color = "steelblue",
+               size = 3) +
+    # Add arrows for variables
+    geom_segment(data = loadings,
+                aes(x = 0, y = 0, 
+                    xend = PC1 * 5,
+                    yend = PC2 * 5),
+                arrow = arrow(length = unit(0.2, "cm")),
+                color = "coral") +
+    # Add variable labels
+    geom_text_repel(data = loadings,
+                    aes(x = PC1 * 5.5,
+                        y = PC2 * 5.5,
+                        label = variable),
+                    color = "brown",
+                    size = 3,
+                    max.overlaps = 20) +
+    # Add ZCTA labels for extreme points
+    geom_text_repel(data = extreme_points,
+                    aes(x = PC1, y = PC2, 
+                        label = zcta5),
+                    size = 3,
+                    color = "steelblue",
+                    box.padding = 0.5) +
+    # Theme and labels
+    theme_classic() +
+    labs(
+        title = "PCA Biplot of Sleep and Demographic Variables",
+        x = paste0("PC1 (", round(var_explained[1], 1), "%)"),
+        y = paste0("PC2 (", round(var_explained[2], 1), "%)")
+    ) +
+    # Add reference lines
+    geom_hline(yintercept = 0, linetype = "dashed", alpha = 0.3) +
+    geom_vline(xintercept = 0, linetype = "dashed", alpha = 0.3) +
+    # Make the plot square
+    coord_fixed()
+
+print(p)
+```
+
+In case you were curious, those 4 outliers are...
+```{r}
+df |> 
+  filter(zcta5 %in% c(11368, 11212, 11360, 10004)) |> 
+  select("zcta5", "neighborhood", "borough", "nh_total", "white", "black",
+         "asian", "hispanic", "total", "inc_mean", "ins_total", "edu_min_ba", 
+         "total_25yo") |>
+  mutate(
+    perc_white = white / nh_total * 100,
+    perc_black = black / nh_total * 100,
+    perc_asian = asian / nh_total * 100,
+    perc_hispanic = hispanic / total * 100,
+    inc_mean = as.numeric(inc_mean),
+    ins_total = as.numeric(ins_total),
+    perc_ba_plus = edu_min_ba / total_25yo * 100
+  ) |> 
+  select(-"nh_total", -"white", -"black",
+         -"asian", -"hispanic", -"total", -"edu_min_ba", 
+         -"total_25yo")
+```
+
+Here are the key takeaways from this PCA biplot:
+
+-   The first two principal components explain a large portion of variance (PC1: 62.2%, PC2: 16.3%, total: 78.5%)
+
+-   Sleep deprivation measures across years (2018, 2020, 2022):
+
+    -   Show strong correlation with each other
+    -   Have positive association with Black population percentage
+    -   Have negative association with income, education (Bachelor's), and White population percentage
+    -   Show moderate negative correlation with insurance coverage
+
+-   Socioeconomic and demographic relationships:
+
+    -   Asian and Hispanic populations show near orthogonality (little correlation)
+    -   White and Black populations show strong negative correlation
+    -   Insurance coverage shows strong positive correlation with income and education levels
+    -   Both Asian and Hispanic populations show negative associations with insurance coverage
+    -   Income, education, and insurance coverage cluster together, suggesting strong interrelation
+
+-   Notable outlier ZIP Code Tabulation Areas (ZCTAs):
+
+    -   11368: Extremely high PC2 score
+    -   11212: Extremely high PC1 score
+    -   10004 and 11360: Extremely low PC1 scores
+
+-   Methodological note:
+
+    -   Arrow orientations (not directions) indicate relationships
+    -   Cosine of angle between arrows approximates correlation
+    -   Arrow length indicates strength of variable's contribution to shown components
+
+## Racial Differences in Sleep Deprivation Alongside Income
+
+### Percentage Black population at Different Income Levels - GRAPH 8
+```{r}
+# Load and prepare the data
+df <- read.csv("data/sleep_health_final_dataset.csv")
+
+# Calculate percentage black and create income groups
+df <- transform(df,
+    perc_black = black / nh_total * 100,
+    # Create income groups based on mean income
+    income_group = cut(as.numeric(inc_mean), 
+                      breaks = quantile(as.numeric(inc_mean), probs = seq(0, 1, by = 0.25), na.rm = TRUE),
+                      labels = c("Low Income", "Lower-Middle Income", "Upper-Middle Income", "High Income"),
+                      include.lowest = TRUE)
+)
+
+# Create the scatter plot
+library(ggplot2)
+
+p <- ggplot(df, aes(x = perc_black, y = perc_sleep18)) +
+    geom_point(alpha = 0.6) +
+    geom_smooth(method = "lm", se = TRUE, color = "red", alpha = 0.2) +
+    facet_wrap(~income_group) +
+    theme_minimal() +
+    labs(
+        title = "Sleep Deprivation vs Black Population Percentage by Income Group",
+        x = "Black Population (%)",
+        y = "Sleep Deprived Population (%)",
+        caption = "Income groups based on quartiles of mean income"
+    ) +
+    theme(
+        plot.title = element_text(size = 11),
+        axis.text = element_text(size = 9),
+        strip.text = element_text(size = 9)
+    )
+
+print(p)
+```
+*MAYBE LABEL THE OUTLIER HERE*
+
+### Percentage White population at Different Income Levels - GRAPH 9
+
+```{r}
+# Load and prepare the data
+df <- read.csv("data/sleep_health_final_dataset.csv")
+
+# Calculate percentage white and create income groups
+df <- transform(df,
+    perc_white = white / nh_total * 100,
+    # Create income groups based on mean income
+    income_group = cut(as.numeric(inc_mean), 
+                      breaks = quantile(as.numeric(inc_mean), 
+                                        probs = seq(0, 1, by = 0.25), 
+                                        na.rm = TRUE),
+                      labels = c("Low Income", "Lower-Middle Income", 
+                                 "Upper-Middle Income", "High Income"),
+                      include.lowest = TRUE)
+)
+
+
+ggplot(df, aes(x = perc_white, y = perc_sleep18)) +
+    geom_point(alpha = 0.6) +
+    geom_smooth(method = "lm", se = TRUE, color = "red", alpha = 0.2) +
+    facet_wrap(~income_group) +
+    theme_minimal() +
+    labs(
+        title = "Sleep Deprivation vs White Population Percentage by Income Group",
+        x = "White Population (%)",
+        y = "Sleep Deprived Population (%)",
+        caption = "Income groups based on quartiles of mean income"
+    ) +
+    theme(
+        plot.title = element_text(size = 11),
+        axis.text = element_text(size = 9),
+        strip.text = element_text(size = 9)
+    )
+```
+
 

@@ -49,7 +49,8 @@ ggplot(missing_matrix, aes(x = column, y = row_id, fill = is_missing)) +
 ## Zero Value Analysis
 ```{r}
 # Calculate percentage of zeros for all numeric columns
-zero_summary <- sapply(df, function(x) if(is.numeric(x)) mean(x == 0) * 100 else NA) |>
+zero_summary <- sapply(df, function(x) if(is.numeric(x)) mean(x == 0) * 
+                         100 else NA) |>
   as.data.frame() |>
   setNames("zero_percentage") |>
   rownames_to_column("variable") |>
@@ -57,7 +58,8 @@ zero_summary <- sapply(df, function(x) if(is.numeric(x)) mean(x == 0) * 100 else
   arrange(desc(zero_percentage))
 
 # Create a bar plot
-ggplot(zero_summary, aes(x = reorder(variable, zero_percentage), y = zero_percentage)) +
+ggplot(zero_summary, aes(x = reorder(variable, zero_percentage), 
+                         y = zero_percentage)) +
   geom_bar(stat = "identity", fill = "steelblue", alpha = 0.8) +
   geom_text(aes(label = sprintf("%.1f%%", zero_percentage)), 
             hjust = -0.1, 
