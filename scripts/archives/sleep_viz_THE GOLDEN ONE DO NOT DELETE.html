@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>NYC Sleep Deprivation Interactive Map</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+        <style>
+            body {
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            
+            .tooltip {
+                position: absolute;
+                background-color: white;
+                padding: 10px;
+                border: 1px solid #ddd;
+                pointer-events: none;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            
+            .control-panel {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background-color: white;
+                padding: 10px;
+                border: 1px solid #ddd;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            
+            select {
+                font-family: Arial, Helvetica, sans-serif;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <div class="control-panel">
+            <h3>Variable Selection</h3>
+            <select id="variable-select">
+                <option value="sleep_deprivation">Sleep Deprivation</option>
+                <option value="median_income">Median Income</option>
+                <option value="education_ba_plus">Education (BA+)</option>
+                <option value="poverty_rate">Poverty Rate</option>
+            </select>
+        </div>
+        <script src="sleep_viz.js"></script>
+    </body>
+</html>

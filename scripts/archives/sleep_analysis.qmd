@@ -1,0 +1,48 @@
+---
+title: "NYC Sleep Deprivation Analysis"
+format: 
+  html:
+    theme: cosmo
+    code-fold: true
+    execute:
+      warning: false
+      message: false
+---
+
+```{r}
+# Load libraries
+library(sf)
+library(jsonlite)
+
+# Read and prepare data
+sleep_data <- read.csv("sleep_health_final_dataset.csv")
+
+# Convert income to numeric
+sleep_data$inc_mean <- as.numeric(gsub(",", "", sleep_data$inc_mean))
+
+# Read shapefile and convert to GeoJSON
+nyc_shapes <- st_read("sleep_health_geo_dataset.shp", quiet = TRUE)
+st_write(nyc_shapes, "nyc_shapes.geojson", driver = "GeoJSON", delete_dsn = TRUE, 
+         quiet = TRUE)
+
+# Create D3-ready JSON with selected variables
+d3_data <- data.frame(
+    zipcode = sleep_data$zcta5,
+    borough = sleep_data$borough,
+    neighborhood = sleep_data$neighborhood,
+    sleep_deprivation = sleep_data$perc_sleep22,
+    median_income = sleep_data$inc_mean,
+    education_ba_plus = sleep_data$edu_min_ba,
+    poverty_rate = sleep_data$pov_families
+)
+
+# Save as JSON
+write_json(d3_data, "sleep_viz_data.json")
+
+# Calculate correlations
+vars_to_correlate <- c("perc_sleep22", "inc_mean", "edu_min_ba", "pov_families")
+cor_matrix <- cor(sleep_data[vars_to_correlate], use="complete.obs")
+print("Correlations with Sleep Deprivation (2022):")
+print(cor_matrix[1, ])
+```
+

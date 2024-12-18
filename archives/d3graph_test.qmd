@@ -1,0 +1,47 @@
+# Interactive graph
+
+<iframe src="scripts/sleep_viz.html" width="1000" height="900"></iframe>
+
+
+## Code from original d3graph.qmd template file
+
+<style>
+  * {
+    font-family: sans-serif;
+  }
+</style> 
+
+<div id="plot">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="scripts/myscript.js"></script>
+
+## 2nd attempt to use edav template
+
+<style>
+  * {
+    font-family: sans-serif;
+  }
+  
+  #plot {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+  }
+  
+  .tooltip {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    pointer-events: none;
+  }
+</style> 
+
+<div id="plot">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="scripts/myscript.js"></script>

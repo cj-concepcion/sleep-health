@@ -1,13 +1,7 @@
-# Interactive graph
+# Interactive Graph
 
-<style>
-  * {
-    font-family: sans-serif;
-  }
-</style> 
+## Sleep Health Visualization
 
-<div id="plot">
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="scripts/myscript.js"></script>
+::: {.column-screen}
+<iframe src="scripts/sleep_viz.html" width="100%" height="600px" frameborder="0"></iframe>
+:::
