@@ -156,7 +156,11 @@ iframe {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sleep-health-visualization" id="toc-sleep-health-visualization" class="nav-link active" data-scroll-target="#sleep-health-visualization"><span class="header-section-number">4.1</span> Sleep Health Visualization</a></li>
+  <li><a href="#sleep-health-and-socioeconomic-heat-map-of-nyc" id="toc-sleep-health-and-socioeconomic-heat-map-of-nyc" class="nav-link active" data-scroll-target="#sleep-health-and-socioeconomic-heat-map-of-nyc"><span class="header-section-number">4.1</span> Sleep Health and Socioeconomic Heat Map of NYC</a>
+  <ul class="collapse">
+  <li><a href="#instructions-for-using-this-interactive-graph" id="toc-instructions-for-using-this-interactive-graph" class="nav-link" data-scroll-target="#instructions-for-using-this-interactive-graph"><span class="header-section-number">4.1.1</span> <strong><em>Instructions for using this interactive graph</em></strong></a></li>
+  <li><a href="#variable-units" id="toc-variable-units" class="nav-link" data-scroll-target="#variable-units"><span class="header-section-number">4.1.2</span> <strong><em>Variable Units</em></strong></a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/cj-concepcion/sleep-health/edit/main/d3graph.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/cj-concepcion/sleep-health/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -182,14 +186,37 @@ iframe {
 </header>
 
 
-<section id="sleep-health-visualization" class="level2 page-columns page-full" data-number="4.1">
-<h2 data-number="4.1" class="anchored" data-anchor-id="sleep-health-visualization"><span class="header-section-number">4.1</span> Sleep Health Visualization</h2>
+<section id="sleep-health-and-socioeconomic-heat-map-of-nyc" class="level2 page-columns page-full" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="sleep-health-and-socioeconomic-heat-map-of-nyc"><span class="header-section-number">4.1</span> Sleep Health and Socioeconomic Heat Map of NYC</h2>
 <div class="column-screen">
 <iframe src="scripts/sleep_viz.html" width="100%" height="600px" frameborder="0">
 </iframe>
 </div>
+<section id="instructions-for-using-this-interactive-graph" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="instructions-for-using-this-interactive-graph"><span class="header-section-number">4.1.1</span> <strong><em>Instructions for using this interactive graph</em></strong></h3>
+<p><strong>The goal of this graph is to allow you to better dynamically explore relationships across these various socioeconomic factors and sleep deprivation.</strong></p>
+<p><strong>With a static heatmap plot, it gets crowded very quickly when trying to label each region. With this interactive plot, you can highlight and get info about certain areas as you choose and explore its patterns with different variables!</strong></p>
+<p><strong><em>HOW?</em></strong></p>
+<ol type="1">
+<li>Use the variable selection drop-down menu to select different variables and observe how the heat map changes to uncover potential patterns across the different variables.
+<ul>
+<li>Keep in mind that darker colors = greater values, but that greater values aren’t always a negative thing (i.e., higher income = darker colors but income tends to be negatively correlated with sleep deprivation)</li>
+</ul></li>
+<li>Hover over an area on the map to see that area’s specific zip code, neighborhood, and specific value for the current selected variable</li>
+</ol>
+<p><strong><em>Hope you have fun with this visual!</em></strong></p>
+</section>
+<section id="variable-units" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="variable-units"><span class="header-section-number">4.1.2</span> <strong><em>Variable Units</em></strong></h3>
+<ul>
+<li><strong>Sleep Deprivation</strong>: percent of ZCTA population sleeping &lt; 7 hours</li>
+<li><strong>Median Income</strong>: US dollars</li>
+<li><strong>Education (BA+)</strong>: total number of individuals per ZCTA with BA degree or higher</li>
+<li><strong>Poverty Rate</strong>: percent of ZCTA population falling below the poverty line</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

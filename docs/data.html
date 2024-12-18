@@ -190,7 +190,12 @@ iframe {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a></li>
+  <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a>
+  <ul class="collapse">
+  <li><a href="#population-demographics-race-and-socioeconomic-data" id="toc-population-demographics-race-and-socioeconomic-data" class="nav-link" data-scroll-target="#population-demographics-race-and-socioeconomic-data">Population Demographics: Race and Socioeconomic Data</a></li>
+  <li><a href="#sleep-data-over-time" id="toc-sleep-data-over-time" class="nav-link" data-scroll-target="#sleep-data-over-time">Sleep Data Over Time</a></li>
+  <li><a href="#additional-resources" id="toc-additional-resources" class="nav-link" data-scroll-target="#additional-resources">Additional Resources</a></li>
+  </ul></li>
   <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</a>
   <ul class="collapse">
   <li><a href="#missing-value-plot" id="toc-missing-value-plot" class="nav-link" data-scroll-target="#missing-value-plot"><span class="header-section-number">2.2.1</span> Missing Value Plot</a></li>
@@ -221,17 +226,59 @@ iframe {
 </header>
 
 
-<p>Sleep data will primarily be drawn from the Center for Disease Control and Prevention (http://www.cdc.gov/places/) and population demographic data from the U.S. Census Bureau (https://data.census.gov/all/tables).</p>
+<p>Sleep data was drawn from the <a href="http://www.cdc.gov/places/">Center for Disease Control and Prevention</a> and population demographic data from the <a href="https://data.census.gov/all/tables">U.S. Census Bureau</a>.</p>
 <section id="description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="description"><span class="header-section-number">2.1</span> Description</h2>
-<p><strong>Population Demographics: Race and Socioeconomic Data</strong> These data are available on the U.S. Census Bureau website, they just have to properly be queried at the zipcode tabulation area (ZCTA) level which ended up being more time consuming than initially planned because I could not find a way to get it at the ZCTA level without having to manually select/filter all the ZCTAs that fall within NYC. If you try to filter by county for instance, it will only give you the population demographics aggregated at the county level vs.&nbsp;ZCTA, which would not match our unit of analysis. This will be sorted soon! The good thing is there is a clear concrete plan and the data is there in a unit similar to to the sleep data (percentage or prevalence per ZCTA).</p>
-<p><strong>Sleep Data Over Time</strong> Sleep data are obtained from the CDC’s PLACES Local Data for Better Health datasets directly from the CDC website (Center for Disease Control and Prevention, 2020, 2023, 2024). The PLACES datasets are created with ZCTA-level estimates derived from data collected through the nationally representative annual U.S. Behavioral Risk Factor Surveillance Survey (BRFSS). The BRFSS is an annual, phone-based survey of the US population who are 18 years and older. The CDC works with local state health department to interview respondents. Every other year, the BRFSS includes a question asking “On average, how many hours of sleep do you get in a 24-hour period?”.</p>
-<p>Using the BRFSS data, an estimate is created for the percentage of the population (per ZCTA) that reports sleeping &lt; 7 hours on average. Population data used to help model these estimates were drawn from the American Community Surveys (ACS) for each of the respective BRFSS years (2018, 2020, 2022). The ACS is collected and managed by the U.S. Census Bureau. Because sleep data is only collected every other year and PLACES short sleep prevalence estimates are created using the most recent year with available data (even if the year the data were collected does not align with the release year of the PLACES dataset) I plan to use the PLACES datasets for the years 2020, 2023, 2024 which created estimates for sleep using BRFSS data from 2018, 2020, and 2022. respectively (Center for Disease Control and Prevention, 2020, 2023 &amp; 2024).</p>
+<section id="population-demographics-race-and-socioeconomic-data" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="population-demographics-race-and-socioeconomic-data">Population Demographics: Race and Socioeconomic Data</h3>
+<p>These data are available on the U.S. Census Bureau website. Make sure to select all ZCTAs that fall within New York state!</p>
+<ul>
+<li><a href="https://data.census.gov/table/ACSDT5Y2022.B03002?q=Race%20and%20Ethnicity&amp;g=040XX00US36$8600000&amp;y=2022">Race and Ethnicity Data</a></li>
+<li><a href="https://data.census.gov/table/ACSDP5Y2022.DP03?q=selected%20demographi&amp;g=860XX00US10002,10003,10004,10006&amp;y=2022">Selected Demographics (Part 1)</a></li>
+<li><a href="https://data.census.gov/table/ACSDP5Y2022.DP02?q=selected%20demographi&amp;g=860XX00US10002,10003,10004,10006&amp;y=2022">Selected Demographics (Part 2)</a></li>
+</ul>
+</section>
+<section id="sleep-data-over-time" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="sleep-data-over-time">Sleep Data Over Time</h3>
+<p>Sleep data are obtained from the CDC’s PLACES Local Data for Better Health datasets directly from the CDC website (Center for Disease Control and Prevention, 2020, 2023, 2024). The PLACES datasets are created with ZCTA-level estimates derived from data collected through the nationally representative annual U.S. Behavioral Risk Factor Surveillance Survey (BRFSS). The BRFSS is an annual, phone-based survey of the US population who are 18 years and older. The CDC works with local state health department to interview respondents. Every other year, the BRFSS includes a question asking “On average, how many hours of sleep do you get in a 24-hour period?”.</p>
+<p>Using the BRFSS data, an estimate is created for the percentage of the population (per ZCTA) that reports sleeping &lt; 7 hours on average. Population data used to help model these estimates were drawn from the American Community Surveys (ACS) for each of the respective BRFSS years (2018, 2020, 2022). The ACS is collected and managed by the U.S. Census Bureau. Because sleep data is only collected every other year and PLACES short sleep prevalence estimates are created using the most recent year with available data (even if the year the data were collected does not align with the release year of the PLACES dataset).</p>
+</section>
+<section id="additional-resources" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="additional-resources">Additional Resources</h3>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Data Sources
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="https://data.cityofnewyork.us/Health/Modified-Zip-Code-Tabulation-Areas-MODZCTA-/pri4-ifjk/data_preview">NYC ZCTA to Borough to Neighborhood Crosswalk File</a></li>
+<li><a href="https://nychealth.github.io/covid-maps/modzcta-geo/about.html">ZCTA Shapefile</a></li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Data Cleaning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All data cleaning files and steps can be found in the <a href="https://github.com/cj-concepcion/sleep-health/tree/main/data_cleaning">data_cleaning folder</a> <em>(BONUS: a funny joke and pun awaits inside if you can find it)</em></p>
+</div>
+</div>
+</section>
 </section>
 <section id="missing-value-analysis" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</h2>
-<p>Because each row of the sleep data is a model estimated value, there actually aren’t any NAs in this dataset, however once I merge the Bureau demographic data, I anticipate NAs will be introduced simply by mismatched or unmatched ZTCAs.</p>
-<p>My plan for the final project is that once these datsets are properly merged, I will do a proper pivot longer and create a “missing” data column and do a geom_tile plot to visualize the missing data. I am thinking to do 1 missing data plot per year so as to not overcrowd the visual.</p>
+<p>Because each row of the sleep data is a model estimated value, there actually aren’t any NAs in this dataset, this is demonstrated by the plot below.</p>
 <section id="missing-value-plot" class="level3" data-number="2.2.1">
 <h3 data-number="2.2.1" class="anchored" data-anchor-id="missing-value-plot"><span class="header-section-number">2.2.1</span> Missing Value Plot</h3>
 <div class="cell">
@@ -314,8 +361,7 @@ iframe {
 </div>
 </div>
 <ul>
-<li>Write about systematic 0 values, race makes sense in areas of less diversity, income makes sense since they are gradiated steps / cumulative / may be mutually exclusive in that way</li>
-<li><em>POSSIBLE BONUS IF THERES TIME</em> - look deeper into systemic SES patterns for ZCTAs with multiple 0’s</li>
+<li>Our highest instances of zero values are for percentage of native populations (Native Hawaiian or Other Pacific Islander and American Indian or Alaska Native). This likely reflects true 0 values and indicates the under representation of these groups within New York City.</li>
 </ul>
 <div class="cell">
 <details class="code-fold">
@@ -415,6 +461,9 @@ iframe {
 </div>
 </div>
 </div>
+<ul>
+<li>The systematic pattern of zero values in certain ZCTAs (especially Manhattan’s 10004, 10006 and other Financial District areas) likely reflects extreme income stratification - these wealthy neighborhoods simply have no households in the lower income brackets (under 15k and 25k), rather than indicating missing data.</li>
+</ul>
 
 
 </section>

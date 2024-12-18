@@ -1,24 +1,26 @@
 # Results
 
-## Sleep Trends Over Time (2018-2022)
+## Sleep Trends by Borough
 
-### Average Overall Trend Over Time - GRAPH 1 MEDIOCRE
+### Which borough is the most sleep deprived?
+
+Before diving in, let's start by exploring what sleep deprivation trends looked like over the past 6 years (3 time points) for each borough.
 
 ```{r}
-# Load required libraries
 library(tidyverse)
 library(scales)
 library(ggplot2)
 
-# Reshape the data for easier plotting
-sleep_data <- read.csv("data_cleaning/sleep_health_final_dataset.csv") |>
+# Read and reshape the data by borough
+sleep_data <- read.csv("data/sleep_health_final_dataset.csv") |>
+  group_by(borough) |>
   summarise(
     sleep18_2018 = mean(perc_sleep18),
     sleep18_2020 = mean(perc_sleep20),
     sleep18_2022 = mean(perc_sleep22)
   ) |>
   pivot_longer(
-    cols = everything(),
+    cols = -borough,
     names_to = "measure",
     values_to = "percentage"
   ) |>
@@ -27,27 +29,28 @@ sleep_data <- read.csv("data_cleaning/sleep_health_final_dataset.csv") |>
       str_detect(measure, "2018") ~ 2018,
       str_detect(measure, "2020") ~ 2020,
       str_detect(measure, "2022") ~ 2022
-    ),
-    age_group = str_extract(measure, "\\d+") |> 
-      paste0("Age ", str_extract(measure, "\\d+"), "+") # paste0("Age ", _, "+") # or we could just do: paste0("Age ", str_extract(measure, "\\d+"), "+")
+    )
   )
 
-# Create the plot
-sleep_trends_plot <- ggplot(sleep_data, aes(x = year, y = percentage, group = 1)) +
-  geom_line(linewidth = 1, color = "#2c3e50") +
-  geom_point(size = 3, color = "#2c3e50") +
+# Create the plot with multiple lines by borough
+ggplot(sleep_data, aes(x = year, y = percentage, 
+                                            color = borough, group = borough)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 3) +
   scale_y_continuous(
     limits = c(30, 45),
     labels = function(x) paste0(x, "%"),
     breaks = seq(30, 45, by = 5)
   ) +
   scale_x_continuous(breaks = c(2018, 2020, 2022)) +
+  scale_color_brewer(palette = "Set2") +
   labs(
-    title = "Sleep Deprivation Trends in NYC (2018-2022)",
+    title = "Sleep Deprivation Trends by Borough in NYC (2018-2022)",
     subtitle = "Percentage of adults sleeping less than 7 hours per night",
     x = "Year",
-    y = "Percentage of Population",
-    caption = "Data source: NYC Health Department"
+    y = "Percentage of Population (per ZCTA)",
+    color = "Borough",
+    caption = "Data source: CDC"
   ) +
   theme_minimal() +
   theme(
@@ -55,20 +58,64 @@ sleep_trends_plot <- ggplot(sleep_data, aes(x = year, y = percentage, group = 1)
     plot.subtitle = element_text(color = "gray30"),
     axis.title = element_text(face = "bold"),
     panel.grid.minor = element_blank(),
-    plot.caption = element_text(color = "gray30", hjust = 0)
+    plot.caption = element_text(color = "gray30", hjust = 0),
+    legend.position = "right"
   )
-
-# Display the plot
-print(sleep_trends_plot)
 ```
 
-## Sleep Trends by Neighborhood - GRAPH 2A 
+-   Overall, across boroughs, we see a decrease in short sleep prevalence in 2020. This makes a lot of sense given the COVID-19 pandemic and resulting lockdown.
+-   Manhattan appears to be the most well-rested (aka show the lowest population percentage of short sleep prevalence)
+-   Interestingly, most boroughs differences in short sleep prevalence remain consistent, but the Bronx shows a steep increase between 2020 and 2022, catching up to short sleep prevalence rates in Staten Island despite having been lower than the previous 2 year time points.
+
+*Let's now look at 2022 data on the map to see what it looks like geographically!*
+
+```{r}
+library(sf)
+library(viridis)
+
+sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp", quiet =
+                                   TRUE)
+library(ggrepel)
+# Borough-level view with neighborhood labels
+sleep_health_data_geo |>
+  group_by(borough) |>
+  summarise(
+    avg_sleep = mean(prc_s22),
+    .groups = "drop"
+  ) |>
+  ggplot() +
+  geom_sf(aes(fill = avg_sleep)) +
+  geom_sf_label(aes(label = borough), 
+                size = 3,
+                alpha = 0.8) +
+  scale_fill_viridis(
+    option = "magma",
+    name = "Average %\nSleeping <7hrs",
+    direction = -1  # Added this line to flip the scale
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Sleep Deprivation by Borough (2022)",
+    subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
+    caption = "Data source: CDC"
+  ) +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    plot.subtitle = element_text(color = "gray30"),
+    legend.position = "right",
+    panel.grid = element_blank(),
+    axis.text = element_blank()
+  )
+```
+
+-   Replicating what we saw in the line graph above, we see that the Bronx and Staten Island had very similar rates of short sleep prevalence, denoted by the similar dark purple/black color.
+-   However, another thing made clear in this graph (especially for those who are familiar with NYC) is that analyzing/exploring these data at the borough-level might be a bit too reductionist or over simplistic. This is made evident by the stark cuts in color across the map. Let's fine grain our analysis further to possibly reveal more subtle or nuanced patterns.
+
+## Sleep Trends by Neighborhood
 
 ```{r}
 library(sf)
 library(viridis) 
-sleep_health_data_geo <- st_read("data/sleep_health_geo_dataset.shp", quiet =
-                                   TRUE)
 
 # Basic choropleth of 2022 sleep deprivation rates
 ggplot() +
@@ -95,10 +142,18 @@ ggplot() +
     panel.grid = element_blank(),
     axis.text = element_blank()
   )
-
 ```
 
-### Neighborhood Sleep Trends Over Time - GRAPH 2B
+-   Above you now see a heatmap of NYC short sleep prevalence at a much more fine-grain level, that is the Zip Code Tabulation Area (ZCTA) level (essentially very similar to how you think of zipcodes but just modified to accommodate an geoographic area vs a single point coordinate).
+
+-   As you can see this reveals a much richer analysis of short sleep prevalence patterns (with darker color indicating greater short sleep prevalence or more sleep deprived people in that area).
+
+-   An interesting pattern to notice here is the gradient color effect that occurs throughout the city, basically that you don't see a stark jump from one color to another in neighboring zip code areas. This strengthens (though does not definitively confirm) the idea that there may be geographic factors at play that influence sleep patterns, given that zip code areas closer together tend to trend in the same direction.
+
+*Now let's explore how these zip code areas shift over time!*
+
+### Neighborhood Sleep Trends Over Time
+
 ```{r}
 # Faceted version showing change over time
 sleep_health_data_geo_long <- sleep_health_data_geo |>
@@ -140,7 +195,20 @@ ggplot() +
   )
 ```
 
-### Zooming in further.. which neighborhoods experienced the greatest changes in sleep deprivation patterns between 2018, 2020 and 2022? *GRAPH 3 & 4*
+-   Because NYC has 177 zipcode areas, it would be too visually overwhelming to explore this data with each ZCTA as its own line on a multi-line plot. Instead, what we have visualized above is the same heat map of short sleep prevalence, with 1 plot per year.
+
+-   We see the same 2020 trend where sleep improves across the board (as you can see from the whole map become shades lighter in 2020), but a new pattern becomes clear that was obscured by the overall borough trends over time in the line graph earlier.
+
+    -   While all ZCTAs experienced a decrease in short sleep prevalence during the pandemic, there is an interesting pattern that emerges in 2022 where the ZCTAs who were sleeping fairly better did not bounce all the way back to their pre-pandemic levels (aka maintained sleep health gains from 2020), but for ZCTAs that had really high short sleep prevalence (\>45%, indexed by the deep dark purple color), their short sleep prevalence had returned to pre-pandemic level.
+
+    -   While there is no data to support this, anecdotally we can intuit that remote/work from home flexibility is often afforded to higher paying jobs vs. lower paying jobs and disparities. It would be interesting to see how long this "pandemic" sleep effect lasts. The most recent data release is data from 2022 so other people should definitely continue to explore this as more data becomes available!
+
+*At this point, we have a rough sense of* ***where*** *there was greater short sleep prevalence, but let's zoom in closer and see which exact neighborhood changed the most across the years.*
+
+### Which neighborhoods experienced the greatest changes in sleep deprivation patterns between 2018, 2020 and 2022?
+
+***Note:*** *Below we will aggregate by neighborhood instead of ZCTA since these neighborhood names may be more readily recognizable than ZCTAs*
+
 ```{r}
 # Load and prepare the data
 df <- read.csv("data/sleep_health_final_dataset.csv")
@@ -153,8 +221,10 @@ neighborhood_sleep <- aggregate(
 )
 
 # Calculate changes
-neighborhood_sleep$change_18_20 <- neighborhood_sleep$perc_sleep20 - neighborhood_sleep$perc_sleep18
-neighborhood_sleep$change_20_22 <- neighborhood_sleep$perc_sleep22 - neighborhood_sleep$perc_sleep20
+neighborhood_sleep$change_18_20 <- neighborhood_sleep$perc_sleep20 - 
+  neighborhood_sleep$perc_sleep18
+neighborhood_sleep$change_20_22 <- neighborhood_sleep$perc_sleep22 - 
+  neighborhood_sleep$perc_sleep20
 
 # Get top 10 decreases for 2018-2020
 top_10_decrease <- neighborhood_sleep[order(neighborhood_sleep$change_18_20), ][1:10, ]
@@ -171,8 +241,8 @@ color_2018 <- "#7294d4"  # muted blue
 color_2020 <- "#d4827e"  # muted red
 color_2022 <- "#82b37d"  # muted green
 
-# Create first Cleveland dot plot (2018-2020 top 10 decreases)
-p1 <- ggplot(top_10_decrease, aes(y = neighborhood)) +
+# First plot (2018-2020)
+ggplot(top_10_decrease, aes(y = neighborhood)) +
     geom_segment(aes(x = perc_sleep18, xend = perc_sleep20, 
                     yend = neighborhood), 
                 color = "#cccccc", size = 0.8) +
@@ -194,15 +264,27 @@ p1 <- ggplot(top_10_decrease, aes(y = neighborhood)) +
         plot.subtitle = element_text(size = 10, color = "grey40"),
         plot.margin = margin(20, 20, 20, 20)
     ) +
-    annotate("text", x = max(top_10_decrease$perc_sleep20) + 1, 
+    scale_x_continuous(limits = function(x) c(min(x) - 5, max(x) + 5)) +
+    coord_cartesian(clip = "off") +
+    annotate("text", 
+             x = mean(top_10_decrease$perc_sleep20), # Changed to align with red dots
              y = 10, 
-             label = "2020", color = color_2020, hjust = 0, size = 4) +
-    annotate("text", x = min(top_10_decrease$perc_sleep18) - 1, 
+             label = "2020", 
+             color = color_2020,
+             hjust = 1, # Center align
+             size = 4) +
+    annotate("text", 
+             x = mean(top_10_decrease$perc_sleep18), # Changed to align with blue dots
              y = 10, 
-             label = "2018", color = color_2018, hjust = 1, size = 4)
+             label = "2018", 
+             color = color_2018,
+             hjust = -1.2, # Center align
+             size = 4)
+```
 
-# Create second Cleveland dot plot (2020-2022 top 10 increases)
-p2 <- ggplot(top_10_increase, aes(y = neighborhood)) +
+```{r}
+# Second plot (2020-2022)
+ggplot(top_10_increase, aes(y = neighborhood)) +
     geom_segment(aes(x = perc_sleep20, xend = perc_sleep22, 
                     yend = neighborhood), 
                 color = "#cccccc", size = 0.8) +
@@ -224,73 +306,134 @@ p2 <- ggplot(top_10_increase, aes(y = neighborhood)) +
         plot.subtitle = element_text(size = 10, color = "grey40"),
         plot.margin = margin(20, 20, 20, 20)
     ) +
-    annotate("text", x = max(top_10_increase$perc_sleep22) + 1, 
+    scale_x_continuous(limits = function(x) c(min(x) - 5, max(x) + 5)) +
+    coord_cartesian(clip = "off") +
+    annotate("text", 
+             x = mean(top_10_increase$perc_sleep20), 
              y = 10, 
-             label = "2022", color = color_2022, hjust = 0, size = 4) +
-    annotate("text", x = min(top_10_increase$perc_sleep20) - 1, 
+             label = "2020", 
+             color = color_2020, 
+             hjust = 1.2, 
+             size = 4) +
+    annotate("text", 
+             x = mean(top_10_increase$perc_sleep22), 
              y = 10, 
-             label = "2020", color = color_2020, hjust = 1, size = 4)
-
-# Print both plots
-print(p1)
-print(p2)
-
-# Print summary statistics for top 10 changes
-print("Top 10 largest decreases 2018-2020:")
-print(data.frame(
-    Neighborhood = top_10_decrease$neighborhood,
-    Change = round(top_10_decrease$change_18_20, 1)
-))
-
-print("\
-Top 10 largest increases 2020-2022:")
-print(data.frame(
-    Neighborhood = top_10_increase$neighborhood,
-    Change = round(top_10_increase$change_20_22, 1)
-))
+             label = "2022", 
+             color = color_2022, 
+             hjust = -1, 
+             size = 4)
 ```
 
-This is quite remarkable - every single neighborhood showed a decrease in sleep deprivation from 2018 to 2020. The changes ranged from -6.6 to -3.1 percentage points, with a median decrease of 5.2 percentage points. This suggests a universal improvement in sleep patterns across all neighborhoods during this period, possibly related to the changes in work and lifestyle patterns during the early pandemic period.
+-   These are all neighborhoods located in the Bronx, one of New York City's five boroughs. Specifically, these neighborhoods are concentrated in the South Bronx region. The South Bronx has historically been one of the most socioeconomically challenged areas in New York City, though it has undergone significant changes and development efforts in recent decades.
 
-This makes the subsequent increases from 2020 to 2022 that we saw in the previous plots even more notable, as they represent a partial reversal of these universal improvements.
-
-### Which borough gets the best sleep? - GRAPH 5 *MEDIOCRE*
+-   All these neighborhoods being in the Bronx is in line (hah, no pun intended!) with the multi-line plot we saw earlier where there was a steep increase in short sleep prevalence for the Bronx between 2020 and 2022, so much so that average 2022 levels were greater than average 2018 levels. A stark counter pattern to a lot of other neighborhood as you're about to see in the 2018 to 2022 comparisons below..
 
 ```{r}
-library(ggrepel)
-# Borough-level view with neighborhood labels
-sleep_health_data_geo |>
-  group_by(borough) |>
-  summarise(
-    avg_sleep = mean(prc_s22),
-    .groups = "drop"
-  ) |>
-  ggplot() +
-  geom_sf(aes(fill = avg_sleep)) +
-  geom_sf_label(aes(label = borough), 
-                size = 3,
-                alpha = 0.8) +
-  scale_fill_viridis(
-    option = "magma",
-    name = "Average %\nSleeping <7hrs",
-    direction = -1  # Added this line to flip the scale
-  ) +
-  theme_minimal() +
-  labs(
-    title = "Sleep Deprivation by Borough (2022)",
-    subtitle = "Average percentage of adults reporting less than 7 hours of sleep",
-    caption = "Data source: CDC"
-  ) +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    plot.subtitle = element_text(color = "gray30"),
-    legend.position = "right",
-    panel.grid = element_blank(),
-    axis.text = element_blank()
-  )
+# Calculate mean sleep deprivation by neighborhood for each year
+neighborhood_sleep <- aggregate(
+    cbind(perc_sleep18, perc_sleep22) ~ neighborhood,
+    data = df,
+    FUN = mean
+)
+
+# Calculate total change and get top 10 by absolute change
+neighborhood_sleep$total_change <- neighborhood_sleep$perc_sleep22 - neighborhood_sleep$perc_sleep18
+
+# Split into increases and decreases
+increases <- neighborhood_sleep[neighborhood_sleep$total_change > 0, ]
+decreases <- neighborhood_sleep[neighborhood_sleep$total_change < 0, ]
+
+# Get top 5 from each
+top_5_increases <- increases[order(-increases$total_change), ][1:5, ]
+top_5_decreases <- decreases[order(decreases$total_change), ][1:5, ]
+
+# Combine and order
+top_changes <- rbind(top_5_increases, top_5_decreases)
+top_changes$change_type <- ifelse(top_changes$total_change > 0, "Increased", "Decreased")
+
+# Create factor with custom ordering
+top_changes$neighborhood <- factor(top_changes$neighborhood,
+                                 levels = c(rev(top_5_decreases$neighborhood), 
+                                          rev(top_5_increases$neighborhood)))
+
+# Define a brighter green for improvements
+bright_green <- "#2ecc71"  # A more distinct green color
+
+ggplot(top_changes, aes(y = neighborhood)) +
+    # Add colored background for increase/decrease sections
+    annotate("rect", 
+            ymin = 5.5, ymax = 10.5,
+            xmin = -Inf, xmax = Inf,
+            fill = "#f8f8f8", alpha = 0.5) +
+    # Original plot elements
+    geom_segment(aes(x = perc_sleep18, xend = perc_sleep22,
+                    yend = neighborhood,
+                    color = change_type),
+                size = 0.8) +
+    geom_point(aes(x = perc_sleep18), color = color_2018, size = 4, alpha = 0.8) +
+    geom_point(aes(x = perc_sleep22), color = color_2022, size = 4, alpha = 0.8) +
+    # Add absolute change values
+    geom_text(aes(x = max(c(perc_sleep18, perc_sleep22)) + 1,
+                  label = sprintf("%+.1f%%", total_change),
+                  color = change_type),
+              hjust = 0, size = 3) +
+    # Updated year labels
+    geom_text(data = data.frame(x = min(top_changes$perc_sleep18),
+                               y = max(as.numeric(top_changes$neighborhood)) + 0.5),
+              aes(x = x, y = y),
+              label = "2018",
+              color = color_2018,
+              hjust = 0.5,
+              size = 3) +
+    geom_text(data = data.frame(x = max(top_changes$perc_sleep22),
+                               y = max(as.numeric(top_changes$neighborhood)) + 0.5),
+              aes(x = x, y = y),
+              label = "2022",
+              color = color_2022,
+              hjust = 0.5,
+              size = 3) +
+    # Theming
+    scale_color_manual(values = c("Increased" = "#d35f5f", "Decreased" = bright_green),
+                      guide = "none") +
+    scale_y_discrete() +
+    theme_minimal() +
+    labs(
+        title = "Largest Changes in Sleep Deprivation (2018 to 2022)",
+        subtitle = "Top 5 increases and decreases in percentage of population reporting insufficient sleep",
+        x = "Percent Sleep Deprived",
+        y = NULL
+    ) +
+    theme(
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.text.x = element_text(size = 10, color = "black"),
+        plot.title = element_text(size = 12, face = "bold"),
+        plot.subtitle = element_text(size = 10, color = "grey40"),
+        plot.margin = margin(t = 20, r = 60, b = 20, l = 20, unit = "pt")  # Reduced left margin
+    ) +
+    scale_x_continuous(
+        limits = c(
+            min(top_changes$perc_sleep18, top_changes$perc_sleep22) - 4,
+            max(top_changes$perc_sleep18, top_changes$perc_sleep22) + 4
+        )
+    ) +
+    coord_cartesian(clip = "off")
 ```
 
-### Which neighborhoods are sleeping the most? - *GRAPH 6A*
+-   Interestingly, once we move onto comparisons between 2018 and 2022, the top 10 neighborhoods that show the greatest changes are no longer unidirectional (as compared to the previous 2 dot plots). There is certainly a lot to unpack here!
+
+    -   **Clear geographic disparity:** Manhattan and Queens neighborhoods saw significant improvements (3-4% decrease in sleep deprivation), while Bronx neighborhoods showed deterioration (1-1.6% increase)
+
+    -   **Potential socioeconomic divide:** Improvements concentrated in more affluent areas (TriBeCa, Lower East Side) while historically underserved communities saw worse sleep patterns
+
+    -   **COVID-19 and WFH impact:** Areas with high concentrations of knowledge workers who could work from home (e.g., TriBeCa, Lower East Side) saw the biggest improvements, while areas with more essential workers (Bronx) saw deterioration
+
+    -   **Population shifts may be a factor:** Changes could partly reflect pandemic-era migration patterns and housing market changes rather than just changes in sleep behavior of existing residents
+
+*Now that we've looked deeply into patterns of change, let's explore overall which neighborhoods are sleeping more than others.*
+
+### Which neighborhoods are sleeping the most?
 
 ```{r}
 # Neighborhood-level view labeling areas with best sleep
@@ -336,8 +479,7 @@ sleep_health_data_geo |>
    axis.text = element_blank()
  )
 ```
-
-### Which neighborhoods are sleeping the least? - *GRAPH 6B*
+### Which neighborhoods are sleeping the least?
 
 ```{r}
 # Neighborhood-level view with selective repelling labels
@@ -388,7 +530,7 @@ Now that we have a sense of sleep deprivation over time and by neighborhood, let
 
 ## How do the various racial and socioeconomic demographics relate to sleep deprivation?
 
-### Principal Component Analysis Biplot - *GRAPH 7*
+### Principal Component Analysis Biplot 
 
 ```{r}
 df <- read.csv("data/sleep_health_final_dataset.csv")
@@ -500,7 +642,20 @@ p <- ggplot() +
 print(p)
 ```
 
-In case you were curious, those 4 outliers are...
+
+
+There's a lot going on in this principal component analysis biplot, so let me orient you to some key trends:
+
+**NOTE:** Generally in interpreting biplots, the closer to arrows are oriented in the same direction, the more closely positively correlated they are. If two arrows point away from one another (180º angle) they tend to be negatively correlated, and if two arrows form a 90º angle then they are orthogonal and not highly related.
+
+   * The PCA biplot shows sleep deprivation strongly correlates with lower income, lower education levels, and lower insurance coverage, while being more prevalent in areas with higher Black populations - this helps explain the neighborhood patterns we saw earlier
+  * These relationships between sleep and socioeconomic factors remain consistent across all three years (2018, 2020, 2022), suggesting persistent disparities rather than temporary pandemic effects
+  * The stark opposing relationship between White and Black populations in relation to sleep deprivation reflects the geographic divides we observed, where predominantly White, higher-income areas like TriBeCa maintained their pandemic sleep improvements while other areas saw sleep health deteriorate
+  * Insurance coverage, income, and education clustering together suggests these advantages (or disadvantages) tend to compound - potentially explaining why certain neighborhoods experienced such different sleep health trajectories during and after the pandemic
+  * Lastly, we pulled out the outliers in each corner to get a better sense of the extremes within our dataset
+
+**In case you were curious, those 4 outliers are and here are some of their key demographics...**
+
 ```{r}
 df |> 
   filter(zcta5 %in% c(11368, 11212, 11360, 10004)) |> 
@@ -521,40 +676,10 @@ df |>
          -"total_25yo")
 ```
 
-Here are the key takeaways from this PCA biplot:
-
--   The first two principal components explain a large portion of variance (PC1: 62.2%, PC2: 16.3%, total: 78.5%)
-
--   Sleep deprivation measures across years (2018, 2020, 2022):
-
-    -   Show strong correlation with each other
-    -   Have positive association with Black population percentage
-    -   Have negative association with income, education (Bachelor's), and White population percentage
-    -   Show moderate negative correlation with insurance coverage
-
--   Socioeconomic and demographic relationships:
-
-    -   Asian and Hispanic populations show near orthogonality (little correlation)
-    -   White and Black populations show strong negative correlation
-    -   Insurance coverage shows strong positive correlation with income and education levels
-    -   Both Asian and Hispanic populations show negative associations with insurance coverage
-    -   Income, education, and insurance coverage cluster together, suggesting strong interrelation
-
--   Notable outlier ZIP Code Tabulation Areas (ZCTAs):
-
-    -   11368: Extremely high PC2 score
-    -   11212: Extremely high PC1 score
-    -   10004 and 11360: Extremely low PC1 scores
-
--   Methodological note:
-
-    -   Arrow orientations (not directions) indicate relationships
-    -   Cosine of angle between arrows approximates correlation
-    -   Arrow length indicates strength of variable's contribution to shown components
-
 ## Racial Differences in Sleep Deprivation Alongside Income
 
-### Percentage Black population at Different Income Levels - GRAPH 8
+### Percentage Black population at Different Income Levels
+
 ```{r}
 # Load and prepare the data
 df <- read.csv("data/sleep_health_final_dataset.csv")
@@ -570,12 +695,12 @@ df <- transform(df,
 )
 
 # Create the scatter plot
-library(ggplot2)
-
-p <- ggplot(df, aes(x = perc_black, y = perc_sleep18)) +
+df |> 
+  filter(!is.na(income_group)) |> 
+  ggplot(aes(x = perc_black, y = perc_sleep18)) +
     geom_point(alpha = 0.6) +
     geom_smooth(method = "lm", se = TRUE, color = "red", alpha = 0.2) +
-    facet_wrap(~income_group) +
+    facet_wrap(~income_group, nrow = 1) +
     theme_minimal() +
     labs(
         title = "Sleep Deprivation vs Black Population Percentage by Income Group",
@@ -589,11 +714,9 @@ p <- ggplot(df, aes(x = perc_black, y = perc_sleep18)) +
         strip.text = element_text(size = 9)
     )
 
-print(p)
 ```
-*MAYBE LABEL THE OUTLIER HERE*
 
-### Percentage White population at Different Income Levels - GRAPH 9
+### Percentage White population at Different Income Levels 
 
 ```{r}
 # Load and prepare the data
@@ -612,11 +735,12 @@ df <- transform(df,
                       include.lowest = TRUE)
 )
 
-
-ggplot(df, aes(x = perc_white, y = perc_sleep18)) +
+df |> 
+  filter(!is.na(income_group)) |> 
+  ggplot(aes(x = perc_white, y = perc_sleep18)) +
     geom_point(alpha = 0.6) +
     geom_smooth(method = "lm", se = TRUE, color = "red", alpha = 0.2) +
-    facet_wrap(~income_group) +
+    facet_wrap(~income_group, nrow = 1) +
     theme_minimal() +
     labs(
         title = "Sleep Deprivation vs White Population Percentage by Income Group",
@@ -631,4 +755,13 @@ ggplot(df, aes(x = perc_white, y = perc_sleep18)) +
     )
 ```
 
+* Because percentage White population was so closely positively correlated with income and so negatively correlated with percentage Black population, I wanted to further tease apart the relationship between sleep deprivation and income by race.
 
+* Looking at how sleep deprivation varies with race across income groups shows a really interesting pattern - while higher income is generally protective against sleep deprivation, the relationship between race and sleep deprivation persists within each income bracket. 
+
+* This suggests we can't explain away sleep disparities through income differences alone.
+There's a striking mirror-image pattern between the Black and White population graphs - as Black population percentage increases, sleep deprivation increases (positive slope), while as White population percentage increases, sleep deprivation decreases (negative slope).
+
+  * This relationship holds true across all income levels, though it's particularly pronounced in the upper-middle and high-income brackets.
+
+* Even in high-income areas, we see places with higher Black populations showing higher sleep deprivation rates (around 45%) compared to areas with higher White populations showing lower rates (around 35%) - this 10% gap hints at other factors beyond income that might affect sleep health, like environmental stressors, healthcare access, or work schedule flexibility.

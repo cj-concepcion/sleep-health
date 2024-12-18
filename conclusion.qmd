@@ -1,1 +1,9 @@
 # Conclusion
+
+Through this exploration of sleep health disparities across NYC neighborhoods from 2018-2022, we've uncovered some concerning patterns of inequity that persist even when controlling for income levels. 
+
+While the COVID-19 pandemic initially led to improved sleep across all areas in 2020, the recovery has been uneven - neighborhoods with higher percentages of White residents and greater socioeconomic resources (like TriBeCa and the Lower East Side) largely maintained their sleep health gains, while predominantly Black neighborhoods and areas with more essential workers (particularly in the Bronx) saw sleep deprivation return to or exceed pre-pandemic levels. 
+
+Most strikingly, even when comparing neighborhoods within the same income bracket, areas with higher Black populations consistently showed higher rates of sleep deprivation than those with higher White populations, pointing to racial disparities that can't be explained by income differences alone. 
+
+This suggests we need to look beyond purely economic factors to address sleep health inequities, considering elements like work schedule flexibility, environmental stressors, and healthcare access that may vary systematically across neighborhoods. As more post-pandemic data becomes available, researchers should continue monitoring these patterns to inform targeted interventions that can help ensure all New Yorkers have equal opportunity for healthy sleep.

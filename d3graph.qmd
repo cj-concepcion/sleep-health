@@ -1,7 +1,31 @@
-# Interactive Graph
+# Interactive Graph 
 
-## Sleep Health Visualization
+## Sleep Health and Socioeconomic Heat Map of NYC
 
 ::: {.column-screen}
 <iframe src="scripts/sleep_viz.html" width="100%" height="600px" frameborder="0"></iframe>
 :::
+
+### ***Instructions for using this interactive graph***
+
+**The goal of this graph is to allow you to better dynamically explore relationships across these various socioeconomic factors and sleep deprivation.** 
+
+**With a static heatmap plot, it gets crowded very quickly when trying to label each region. With this interactive plot, you can highlight and get info about certain areas as you choose and explore its patterns with different variables!**
+
+***HOW?***
+
+1. Use the variable selection drop-down menu to select different variables and observe how the heat map changes to uncover potential patterns across the different variables.
+    - Keep in mind that darker colors = greater values, but that greater values aren't always a negative thing (i.e., higher income = darker colors but income tends to be negatively correlated with sleep deprivation)
+  
+2. Hover over an area on the map to see that area's specific zip code, neighborhood, and specific value for the current selected variable
+
+***Hope you have fun with this visual!***
+
+### ***Variable Units***
+
+- **Sleep Deprivation**: percent of ZCTA population sleeping < 7 hours 
+- **Median Income**: US dollars
+- **Education (BA+)**: total number of individuals per ZCTA with BA degree or higher
+- **Poverty Rate**: percent of ZCTA population falling below the poverty line
+  
+  
